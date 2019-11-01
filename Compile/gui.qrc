@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>add.PNG</file>
+  </qresource>
+  <qresource prefix="newPrefix">
+    <file>del.PNG</file>
+  </qresource>
+</RCC>

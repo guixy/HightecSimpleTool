@@ -132,9 +132,13 @@ class basePage(QMainWindow,Ui_MainWindow):
         self.addPath2.clicked.connect(self.AddExpath)
 
 
-
-
         self.fileselect = fileselect.Ui_Dialog()
+
+        #初始化page
+
+        self.listWidget.currentRowChanged.connect(self.display)
+
+
         #self.initDialog()
 
         #self.fileselect.buttonBox
@@ -160,6 +164,8 @@ class basePage(QMainWindow,Ui_MainWindow):
         if self.excludefiles:
             #a=1
             self.excludeList.addItems(self.excludefiles)
+    def display(self,index):
+        self.stackedWidget.setCurrentIndex(index)
 
 
     def KillProcess(self):
@@ -405,6 +411,16 @@ class basePage(QMainWindow,Ui_MainWindow):
     def modifyFLAG(self,CCFLAGNOW,LINKFLAGNOW,HighTecDirNOW,DebugNameNOW,inpathNOW,expathNOW):
         #f=open('./TOOLS/Compile/automake_config.py','r',encoding='utf-8')
         f = open('./py.pyconfig', 'w', encoding='utf-8')
+        tempLINK=re.split('-L',LINKFLAGNOW)
+        lin1=tempLINK[3]
+        cont=1
+        for iii in lin1[1:]:
+            if iii!='''"''':
+                cont=cont+1
+            else:
+                break
+        lin2=lin1[cont:]
+        LINKFLAGNOW=tempLINK[0]+'''-L"'''+os.path.join(os.getcwd(),'Targets/TC275/RTOS')
         #lines=f.readlines()
         f.write('CCFLAG='+CCFLAGNOW+"\n")
         f.write('LINKFLAG='+LINKFLAGNOW+"\n")
