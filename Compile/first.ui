@@ -290,19 +290,6 @@ QLabel{border:none}
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QListView" name="Llist">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>40</y>
-         <width>351</width>
-         <height>231</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_6">
        <property name="geometry">
         <rect>
@@ -362,10 +349,20 @@ QLabel{border:none}
         </size>
        </property>
       </widget>
+      <widget class="QListWidget" name="Llist">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>40</y>
+         <width>351</width>
+         <height>231</height>
+        </rect>
+       </property>
+      </widget>
       <zorder>add1</zorder>
-      <zorder>Llist</zorder>
       <zorder>label_6</zorder>
       <zorder>del1</zorder>
+      <zorder>Llist</zorder>
      </widget>
      <widget class="QFrame" name="frame11_2">
       <property name="geometry">
@@ -388,19 +385,6 @@ QLabel{border:none}
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QListView" name="llist">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>40</y>
-         <width>351</width>
-         <height>231</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
@@ -456,6 +440,16 @@ QLabel{border:none}
          <width>40</width>
          <height>40</height>
         </size>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="llist">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>40</y>
+         <width>351</width>
+         <height>231</height>
+        </rect>
        </property>
       </widget>
      </widget>

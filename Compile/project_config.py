@@ -10,13 +10,15 @@ import fileselect
 import shutil
 
 from first import Ui_MainWindow
+import AddLibraryPath
+import Enterlibraries
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import  os
 import  re
 import subprocess
 import time
-
+#读取log的线程
 class BackendTread(QThread):
     setvalue = pyqtSignal(int)
     def __init__(self, parent=None):
@@ -37,7 +39,7 @@ class BackendTread(QThread):
             self.setvalue.emit(num)
 
 
-
+#开编译的线程
 class BackendTread1(QThread):
     startcompile1 = pyqtSignal(str)
     endSig = pyqtSignal()
@@ -138,6 +140,11 @@ class basePage(QMainWindow,Ui_MainWindow):
 
         self.listWidget.currentRowChanged.connect(self.display)
 
+        #Library的初始化
+        self.initLibraryWindow()
+        self.Llist.setSelectionMode(3)
+        self.llist.setSelectionMode(3)
+        #self.add2.clidken.connect(self.ShowLWindow)
 
         #self.initDialog()
 
@@ -165,7 +172,35 @@ class basePage(QMainWindow,Ui_MainWindow):
             #a=1
             self.excludeList.addItems(self.excludefiles)
     def display(self,index):
+        self.index=index
         self.stackedWidget.setCurrentIndex(index)
+
+
+    def initLibraryWindow(self):
+        self.LWUI=AddLibraryPath.Ui_LSelect()
+        self.LWin=QWidget()
+        self.LWin.setWindowModality(Qt.ApplicationModal)#设置模态对话框
+        self.LWUI.setupUi(self.LWin)
+        self.LWUI.LibraryP.setText("")
+        self.add1.clicked.connect(self.LWin.show)
+        self.LWUI.L_Cancel.clicked.connect(self.LWin.close)
+        self.LWUI.L_Workspace.clicked.connect(lambda: self.ShowDialog(1))
+        self.LWUI.L_OK.clicked.connect(self.AddLibraryPath)
+        self.del1.clicked.connect(self.DelLibraryPath)
+
+
+        self.lWUI = Enterlibraries.Ui_LSelect()
+        self.lWin = QWidget()
+        self.lWin.setWindowModality(Qt.ApplicationModal)
+        self.lWUI.setupUi(self.lWin)
+        self.LWUI.LibraryP.setText("")
+        self.add2.clicked.connect(self.lWin.show)
+        self.lWUI.l_OK.clicked.connect(self.AddLibraries)
+        self.lWUI.l_Cancel.clicked.connect(self.lWin.close)
+        self.del2.clicked.connect(self.DelLibraries)
+
+
+
 
 
     def KillProcess(self):
@@ -199,8 +234,10 @@ class basePage(QMainWindow,Ui_MainWindow):
             self.AllPath=ac.FindAllPath(dir)
             #print(self.AllPath)
             self.initDialog()
+            #对Dialog按钮的设置
             self.fileselect.buttonBox.accepted.connect(self.GetPath)
             self.fileselect.treeWidget.setSelectionMode(3)
+            self.fileselect.buttonBox.rejected.connect(self.Cleartree)
 
             #self.adds(dir,self.child0)
             a.initUI()
@@ -255,20 +292,6 @@ class basePage(QMainWindow,Ui_MainWindow):
                 self.idRm = 0
 
 
-    def remove1(self,a):
-
-        text_list = self.includeList.selectedItems()
-        #print(11)
-        item=self.includeList.itemAt(a)
-        self.includeList.removeItemWidget(self.includeList.takeItem(self.includeList.row(item)))
-
-    def remove2(self,a):
-
-        text_list = self.excludeList.selectedItems()
-
-
-        item=self.excludeList.itemAt(a)
-        self.excludeList.removeItemWidget(self.excludeList.takeItem(self.excludeList.row(item)))
 
     def EndResult(self):
         print(os.getcwd())
@@ -503,7 +526,7 @@ class basePage(QMainWindow,Ui_MainWindow):
         #fileselect1 = fileselect.Ui_Dialog()
         #fileselect1.setupUi(self.di)
         self.idPath=id
-        self.di.show()
+        self.di.exec()
 
 
 
@@ -540,7 +563,7 @@ class basePage(QMainWindow,Ui_MainWindow):
         #注意：是对QDialog对象show()，并不是自己生成的Ui_Dialog对象 show()，开始没有写self.di，弹窗总是一闪而过，类的的函数加上self之后成功
         #print(QFileDialog.getExistingDirectory(None, "请选择要添加的文件", os.getcwd()))
     def GetPath(self):
-        if self.idPath==1:
+        if self.index==3:
             pathlist = self.fileselect.treeWidget.selectedItems()
             # pathlist = QTreeWidgetItemIterator(self.fileselect.treeWidget)
             # print(pathlist.value().childCount())
@@ -558,8 +581,11 @@ class basePage(QMainWindow,Ui_MainWindow):
                         break
                 if tp not in tempinclude and tp!="":
                     tempinclude.append(tp)
+                    pathss.setSelected(False)
+
 
             self.includeList.addItems(sorted(tempinclude))
+
 
 
         elif self.idPath==2:
@@ -582,6 +608,35 @@ class basePage(QMainWindow,Ui_MainWindow):
                     tempexclude.append(tp)
 
             self.excludeList.addItems(sorted(tempexclude))
+
+
+        elif self.index==2:
+            pathlist = self.fileselect.treeWidget.selectedItems()
+            # pathlist = QTreeWidgetItemIterator(self.fileselect.treeWidget)
+            # print(pathlist.value().childCount())
+            tempexclude = []
+            for pathss in pathlist:
+                tpathss = pathss
+                tp = ""
+                while 1:
+                    if tpathss.text(0) != self.DebugName:
+                        tp = tpathss.text(0) + tp
+                    if tpathss.parent():
+                        tpathss = tpathss.parent()
+                        tp = '/' + tp
+                    else:
+                        break
+                if tp not in tempexclude and tp != "":
+                    tempexclude.append("{workspace}"+tp)
+                    pathss.setSelected(False)
+
+
+            self.Llist.addItems(tempexclude)
+            self.LWin.close()#如果是通过workspace选的直接关掉选择框
+
+
+
+
         self.di.close()
         '''for selectedPath in pathlist:
                 
@@ -598,13 +653,41 @@ class basePage(QMainWindow,Ui_MainWindow):
                 if pathlist.value().checkState(0)==Qt.Checked:
                     print(pathlist.value.text(0))
                     break'''
-    def AddExpath(self):
-        dir1,file1 = QFileDialog.getOpenFileName (self,'选择过滤文件',os.getcwd(),"C FILES(*.c)")
-        #print(dir1,file1)
-        if dir1!='' :
-            dir2 = re.split(os.getcwd().replace('\\','/'),dir1)[1]
-            self.excludeList.addItem(dir2)
+    def Cleartree(self):
+        pathlist = self.fileselect.treeWidget.selectedItems()
+        for pathss in pathlist:
+            pathss.setSelected(False)
+        self.di.close()
 
+    def AddExpath(self):
+        dir1,file1 = QFileDialog.getOpenFileNames (self,'选择过滤文件',os.getcwd(),"C FILES(*.c)")
+        #print(dir1,file1)
+        for ii in dir1:
+            if ii!='' :
+                dir2 = re.split(os.getcwd().replace('\\','/'),ii)[1]
+                self.excludeList.addItem(dir2)
+
+    #Library的具体操作
+    def AddLibraryPath(self):
+        txt=self.LWUI.LibraryP.text()
+        if txt:
+            self.Llist.addItem(txt)
+        self.LWin.close()
+    def AddLibraries(self):
+        txt = self.lWUI.libraries.text()
+        if txt:
+            self.llist.addItem(txt)
+        self.lWin.close()
+    def DelLibraryPath(self):
+        items1 = self.Llist.selectedIndexes()
+        if items1:
+            for jj in items1:
+                self.Llist.removeItemWidget(self.Llist.takeItem(jj.row()))
+    def DelLibraries(self):
+        items1 = self.llist.selectedIndexes()
+        if items1:
+            for jj in items1:
+                self.llist.removeItemWidget(self.llist.takeItem(jj.row()))
 
 if __name__ == '__main__':
     cmd1 = ""
@@ -612,22 +695,14 @@ if __name__ == '__main__':
     VAL=0
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon('./Compile/mainwindowIcon.png'))
-    #mainWindow = QMainWindow()
+
     a=basePage()
 
     a.ChooseProDir()
 
-    #a.showConfInfo()
 
-    #ui = first.Ui_MainWindow()
-    #ui.setupUi(mainWindow)  # 向主窗口上添加控件
 
     a.show()
-    #w = QWidget()
-    #w.resize(300,150)
-    #w.move(300,300)
-    #w.setWindowTitle('first')
-    #w.show()
 
     #进入程序的主循环，并通过exit函数确保主循环安全结束
     sys.exit(app.exec_())

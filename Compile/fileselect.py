@@ -20,7 +20,7 @@ class Ui_Dialog(object):
         self.treeWidget = QtWidgets.QTreeWidget(Dialog)
         self.treeWidget.setGeometry(QtCore.QRect(10, 10, 381, 231))
         self.treeWidget.setObjectName("treeWidget")
-        self.buttonBox.rejected.connect(Dialog.reject)
+
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
