@@ -36,6 +36,7 @@ def FindAllPath(dir):
             if file.endswith('.h')  or file.endswith('.c') and "TOOLS" not in path :
                 AllPath1=SeparatePath(path,AllPath1,dir)
 
+
     return AllPath1
 #print(includepath)
 
@@ -59,12 +60,16 @@ def maininit():
     global LINKFLAG
     global includepath
     global excludefiles
+    global LibraryPath
+    global libraties
     DebugName = '11'
     HighTecDir = ''
     CCFLAG = ''
     LINKFLAG = ''
     includepath = []
     excludefiles = []
+    LibraryPath = []
+    libraties = []
 
 
 
@@ -123,6 +128,26 @@ def maininit():
                     if j == '\n' or j == '':
                         continue
                     excludefiles.append(j)
+            if 'LibraryPath=' in line:
+
+                LibraryPath1 = re.split('LibraryPath=', line)[1]
+                LibraryPath1 = LibraryPath1[0:len(LibraryPath1) - 1]
+                LibraryPath1 = re.split(',', LibraryPath1)
+                for j in LibraryPath1:
+
+                    if j == '\n' or j == '':
+                        continue
+                    LibraryPath.append(j)
+            if 'libraties=' in line:
+
+                libraties1 = re.split('libraties=', line)[1]
+                libraties1 = libraties1[0:len(libraties1) - 1]
+                libraties1 = re.split(',', libraties1)
+                for j in libraties1:
+
+                    if j == '\n' or j == '':
+                        continue
+                    libraties.append(j)
 
 
 
@@ -137,7 +162,7 @@ def maininit():
         else:
             g_except_dir_list.append(os.path.join(PROJECTDIR, exclude))
 
-    return (DebugName,HighTecDir,CCFLAG,LINKFLAG,includepath,excludefiles,g_except_dir_list,g_except_file_list)
+    return (DebugName,HighTecDir,CCFLAG,LINKFLAG,includepath,excludefiles,g_except_dir_list,g_except_file_list,LibraryPath,libraties)
 
 PROJECTDIR=os.getcwd()
 g_handle_subdir = True

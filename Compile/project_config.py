@@ -67,6 +67,9 @@ class BackendTread1(QThread):
             r = self.process.stdout.readline().decode('gbk')
             if r:
                 self.startcompile1.emit(r)
+            if 'tool>pause'in r:
+                break
+        os.system(r"taskkill /f /t /im make.exe")#因为在做post-build的时候，al2的工具需要按回车键才能结束进程，因为在这里强制性的使其结束
         self.endSig.emit()
 
 
@@ -80,7 +83,7 @@ class basePage(QMainWindow,Ui_MainWindow):
         #self.menuclean.triggered.connect(self.CleanProject)
         self.actionclean.triggered.connect(self.CleanProject)
         self.actionopen_project.triggered.connect(self.ChooseProDir)
-        self.actionsave_project.triggered.connect(self.modifyFLAG2)
+        self.actionsave_project.triggered.connect(self.modifyFLAG)
 
         #self.quitApp.triggered.connect(QCoreApplication.instance().quit)   #关闭程序的第一种方式
         self.actionexit.triggered.connect(qApp.quit)#关闭程序的第二种方式
@@ -171,6 +174,14 @@ class basePage(QMainWindow,Ui_MainWindow):
         if self.excludefiles:
             #a=1
             self.excludeList.addItems(self.excludefiles)
+
+        if self.LibraryPath:
+            #a=1
+            self.Llist.addItems(self.LibraryPath)
+        if self.libraties:
+            #a=1
+            self.llist.addItems(self.libraties)
+
     def display(self,index):
         self.index=index
         self.stackedWidget.setCurrentIndex(index)
@@ -222,7 +233,7 @@ class basePage(QMainWindow,Ui_MainWindow):
 
             import automake_config as ac
             (DebugName, HighTecDir, CCFLAG, LINKFLAG, includepath, excludefiles, g_except_dir_list,
-             g_except_file_list) = ac.maininit()
+             g_except_file_list,LibraryPath,libraties) = ac.maininit()
             self.includepath=includepath
             self.excludefiles=excludefiles
             self.DebugName=DebugName
@@ -230,6 +241,8 @@ class basePage(QMainWindow,Ui_MainWindow):
             self.LINKFLAG=LINKFLAG
             self.HighTecDir=HighTecDir
             self.PROJECTDIR=dir
+            self.LibraryPath=LibraryPath
+            self.libraties=libraties
             #print(os.getcwd())
             self.AllPath=ac.FindAllPath(dir)
             #print(self.AllPath)
@@ -255,6 +268,9 @@ class basePage(QMainWindow,Ui_MainWindow):
         child0.setIcon(0, QIcon('./Compile/01.png'))
 
         self.adds(os.getcwd(), child0)
+        child1 = QTreeWidgetItem(child0)
+        child1.setText(0, 'TOOL')
+        child1.setIcon(0, QIcon('./Compile/01.png'))
 
         #展开所有节点
         fileselect1.treeWidget.expandAll()
@@ -411,9 +427,9 @@ class basePage(QMainWindow,Ui_MainWindow):
         #print(CCFLAG1)
         # POSTBUILD1 = pb.get()
         # Hdir = Hdir[0:len(Hdir) - 1]
-        if CCFLAG1 != self.CCFLAG or self.LINKFLAG != LINKFLAG1 or Hdir != self.HighTecDir or DebugName1 != self.DebugName or expath != self.excludefiles or inpath != self.includepath:
-            self.modifyFLAG(CCFLAG1, LINKFLAG1, Hdir, DebugName1,inpath,expath)
-            '''for i in range(0,len(CCFALG)):
+        #if CCFLAG1 != self.CCFLAG or self.LINKFLAG != LINKFLAG1 or Hdir != self.HighTecDir or DebugName1 != self.DebugName or expath != self.excludefiles or inpath != self.includepath:
+        self.modifyFLAG()
+        '''for i in range(0,len(CCFALG)):
                 if CCFALG1[i]!=CCFALG[i]:
                     print(i)'''
         cmd=self.startpath+'\Compile\python  '+self.startpath+"\Compile/automake.py "+self.startpath
@@ -431,38 +447,9 @@ class basePage(QMainWindow,Ui_MainWindow):
             f.write(e.args)
             f.close()
         #def
-    def modifyFLAG(self,CCFLAGNOW,LINKFLAGNOW,HighTecDirNOW,DebugNameNOW,inpathNOW,expathNOW):
-        #f=open('./TOOLS/Compile/automake_config.py','r',encoding='utf-8')
-        f = open('./py.pyconfig', 'w', encoding='utf-8')
-        tempLINK=re.split('-L',LINKFLAGNOW)
-        lin1=tempLINK[3]
-        cont=1
-        for iii in lin1[1:]:
-            if iii!='''"''':
-                cont=cont+1
-            else:
-                break
-        lin2=lin1[cont:]
-        LINKFLAGNOW=tempLINK[0]+'''-L"'''+os.path.join(os.getcwd(),'Targets/TC275/RTOS')
-        #lines=f.readlines()
-        f.write('CCFLAG='+CCFLAGNOW+"\n")
-        f.write('LINKFLAG='+LINKFLAGNOW+"\n")
-        f.write('HighTecDir='+HighTecDirNOW+"\n")
-        f.write('DebugName='+DebugNameNOW+"\n")
-        aa="includepath="
-        for a in inpathNOW:
-            if a !="":
-                aa+=a+','
-        f.write(aa+'\n')
-        bb = "excludefiles="
-        for b in expathNOW:
-            if b!="":
 
-                bb += b + ','
-        f.write(bb+'\n')
-        f.close()
 
-    def modifyFLAG2(self):
+    def modifyFLAG(self):
         # f=open('./TOOLS/Compile/automake_config.py','r',encoding='utf-8')
         CCFLAGNOW = self.GCCFLAGName.toPlainText()
         # CCFLAG1 = CCFLAG1[0:len(CCFLAG1) - 1]
@@ -475,27 +462,66 @@ class basePage(QMainWindow,Ui_MainWindow):
         inpathNOW = []
         exn = self.excludeList.count()
         expathNOW = []
-        for i in range(inn):
-            inpathNOW.append(self.includeList.item(i).text())
-        for i in range(exn):
-            expathNOW.append(self.excludeList.item(i).text())
-        f = open('./py.pyconfig', 'w', encoding='utf-8')
-        # lines=f.readlines()
-        f.write('CCFLAG=' + CCFLAGNOW + "\n")
-        f.write('LINKFLAG=' + LINKFLAGNOW + "\n")
-        f.write('HighTecDir=' + HighTecDirNOW + "\n")
-        f.write('DebugName=' + DebugNameNOW + "\n")
-        aa = "includepath="
-        for a in inpathNOW:
-            if a != "":
-                aa += a + ','
-        f.write(aa + '\n')
-        bb = "excludefiles="
-        for b in expathNOW:
-            if b != "":
-                bb += b + ','
-        f.write(bb + '\n')
-        f.close()
+        Ln = self.Llist.count()
+        LnNOW = []
+        ln = self.llist.count()
+        lnNOW = []
+        try:
+            for i in range(inn):
+                inpathNOW.append(self.includeList.item(i).text())
+            for i in range(exn):
+                expathNOW.append(self.excludeList.item(i).text())
+            f = open('./py.pyconfig', 'w', encoding='utf-8')
+            # lines=f.readlines()
+            tLink = re.split(' ',LINKFLAGNOW)
+            Linkchange=''
+            for iii in tLink:
+                if '-L' not in iii and '-l:' not in iii:
+                    Linkchange+=iii+' '
+
+            for i in range(Ln):
+                p = re.split('{workspace}/',self.Llist.item(i).text())
+                #print(p)
+                if len(p)==1:
+                    Linkchange+='''-L"'''+os.path.abspath(p[0])+'''" '''
+                else:
+                    Linkchange += '''-L"''' + os.path.abspath(p[1]) + '''" '''
+                LnNOW.append(self.Llist.item(i).text())
+            for i in range(ln):
+                Linkchange+='-l'+self.llist.item(i).text()+' '
+                lnNOW.append(self.llist.item(i).text())
+
+
+            f.write('CCFLAG=' + CCFLAGNOW + "\n")
+            f.write('LINKFLAG=' + Linkchange + "\n")
+            f.write('HighTecDir=' + HighTecDirNOW + "\n")
+            f.write('DebugName=' + DebugNameNOW + "\n")
+            aa = "includepath="
+            for a in inpathNOW:
+                if a != "":
+                    aa += a + ','
+            f.write(aa + '\n')
+            bb = "excludefiles="
+            for b in expathNOW:
+                if b != "":
+                    bb += b + ','
+            f.write(bb + '\n')
+            cc = "LibraryPath="
+            for c in LnNOW:
+                if c != "":
+                    cc += c + ','
+            dd = "libraties="
+            for d in lnNOW:
+                if d != "":
+                    dd += d + ','
+            f.write(cc + '\n')
+            f.write(dd + '\n')
+            f.close()
+            self.LINKFLAGName.setText('')
+            self.LINKFLAGName.setText(Linkchange)
+        except:
+            f.close()
+
 
 
     def CleanProject(self):
@@ -549,7 +575,7 @@ class basePage(QMainWindow,Ui_MainWindow):
                 #        if file.endswith('.h') or file.endswith('.c'):
                 #            j=1
 
-                if 'Default' not in i and 'TOOLS' not in i and '.' not in i and '_pycache_' not in os.path.join(paths,i) and os.path.join(
+                if 'Default' not in i  and '.' not in i and '_pycache_' not in os.path.join(paths,i) and os.path.join(
                     paths, i) in self.AllPath:
                     # self.adds(os.path.join(paths, i),root)
                     if os.path.isdir(os.path.join(paths, i)):
@@ -557,6 +583,8 @@ class basePage(QMainWindow,Ui_MainWindow):
                         childs.setText(0, i)
                         childs.setIcon(0, QIcon('./Compile/01.png'))
                         self.adds(os.path.join(paths, i), childs)
+
+
 
 
 
