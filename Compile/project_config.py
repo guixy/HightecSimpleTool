@@ -148,7 +148,8 @@ class basePage(QMainWindow,Ui_MainWindow):
         self.Llist.setSelectionMode(3)
         self.llist.setSelectionMode(3)
         #self.add2.clidken.connect(self.ShowLWindow)
-
+        #状态栏的部件
+        self.barlabel = QLabel('barlabel')
         #self.initDialog()
 
         #self.fileselect.buttonBox
@@ -156,13 +157,15 @@ class basePage(QMainWindow,Ui_MainWindow):
     def initUI(self):
         self.includeList.clear()
         self.excludeList.clear()
+        self.Llist.clear()
+        self.llist.clear()
         self.ProjectName.setText(self.DebugName)
         self.HithTecDir.setText(self.HighTecDir)
         self.GCCFLAGName.setText(self.CCFLAG)
         self.LINKFLAGName.setText(self.LINKFLAG)
         self.ProjectName_2.setText(self.PROJECTDIR)
         self.ProjectName_2.setEnabled(False)
-        self.barlabel = QLabel('barlabel')
+
         self.barlabel.setText('准备中')
         self.statusBar.addPermanentWidget(self.barlabel)
         self.Result.clear()
@@ -269,7 +272,7 @@ class basePage(QMainWindow,Ui_MainWindow):
 
         self.adds(os.getcwd(), child0)
         child1 = QTreeWidgetItem(child0)
-        child1.setText(0, 'TOOL')
+        child1.setText(0, 'TOOLS')
         child1.setIcon(0, QIcon('./Compile/01.png'))
 
         #展开所有节点
@@ -296,16 +299,16 @@ class basePage(QMainWindow,Ui_MainWindow):
     def remove(self):
         items1 = self.includeList.selectedIndexes()
         items2 = self.excludeList.selectedIndexes()
+        if self.index==3:
+            if items1:
+                for jj in items1:
+                    self.includeList.removeItemWidget(self.includeList.takeItem(jj.row()))
+        if self.index == 4:
+            if items2:
+                for jj in items2:
 
-        if items1:
-            for jj in items1:
-                self.includeList.removeItemWidget(self.includeList.takeItem(jj.row()))
+                    self.excludeList.removeItemWidget(self.excludeList.takeItem(jj.row()))
 
-        elif items2:
-            for jj in items2:
-
-                self.excludeList.removeItemWidget(self.excludeList.takeItem(jj.row()))
-                self.idRm = 0
 
 
 

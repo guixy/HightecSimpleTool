@@ -214,7 +214,7 @@ def generaret_subdirmk(sourceItemList,includepath):
 		txtincludepath='@'+nowpath+'/Default/Default.includepathlist'
 		f.write(txtincludepath)
 
-		txt3=' '+CCFLAG
+		txt3=' '+CCFLAG+''' -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"'''
 		f.write(txt3)
 		txt4='''\n	@echo 'Finished building: $<'\n'''
 		txt5="	@echo ' '"
@@ -291,7 +291,7 @@ post-build:
 
 
 path = "."
-(DebugName,HighTecDir,CCFLAG,LINKFLAG,includepath,excludefiles,g_except_dir_list,g_except_file_list)=maininit()
+(DebugName,HighTecDir,CCFLAG,LINKFLAG,includepath,excludefiles,g_except_dir_list,g_except_file_list,LibraryPath,libraties)=maininit()
 
 sourceTypeList = ( ".c",)
 headerTypeList = (".h", )

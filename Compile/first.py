@@ -285,7 +285,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "XMiCom"))
-        self.label_2.setText(_translate("MainWindow", "Hithtec安装路径："))
+        self.label_2.setText(_translate("MainWindow", "Hightec安装路径："))
         self.label.setText(_translate("MainWindow", "工程名字："))
         self.projectDir.setText(_translate("MainWindow", "工程路径："))
         self.label_3.setText(_translate("MainWindow", "例如：D:\\HighTec\\toolchains\\tricore\\v4.6.6.1"))
